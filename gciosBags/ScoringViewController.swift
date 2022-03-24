@@ -17,6 +17,9 @@ class ScoringViewController: UIViewController {
     private var canThrow = true
     private var holePath = UIBezierPath()
     private var boardPath = UIBezierPath()
+    
+    private var redNumOfResets = 1
+    private var blueNumOfResets = 1
 
     @IBOutlet var boardImageView: UIImageView!
     @IBOutlet var roundLabel: UILabel!

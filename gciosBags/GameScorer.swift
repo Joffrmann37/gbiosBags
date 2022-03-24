@@ -41,6 +41,9 @@ class GameScorer {
     var winner: Team? {
         return gameWinner()
     }
+    
+    var isRedReset = false
+    var isBlueReset = false
 
     // -- Initializers
 
@@ -82,7 +85,25 @@ class GameScorer {
 
     /// Round score for the passed in team
     func scoreInRound(_ round: Round, forTeam team: Team) -> Int {
-        return throwsInRound(round, forTeam: team).reduce(0) { $0 + $1.points }
+        let score = throwsInRound(round, forTeam: team).reduce(0) { $0 + $1.points }
+        if score > 21 {
+            if team == .red {
+                round.redThrows.removeAll()
+                round.redThrows.append(.board)
+                round.redThrows.append(.board)
+                round.redThrows.append(.hole)
+                round.redThrows.append(.hole)
+                round.redThrows.append(.hole)
+            } else {
+                round.blueThrows.removeAll()
+                round.blueThrows.append(.board)
+                round.blueThrows.append(.board)
+                round.blueThrows.append(.hole)
+                round.blueThrows.append(.hole)
+                round.blueThrows.append(.hole)
+            }
+        }
+        return score
     }
 
     /// Number of throws in round for the given team
@@ -92,7 +113,9 @@ class GameScorer {
 
     /// Return the result of a given round
     func result(forRound round: Round) -> RoundResult {
-        guard isRoundOver(round) else { return .inProgress }
+        guard isRoundOver(round) else {
+            return .inProgress
+        }
 
         let redTeamPoints = scoreInRound(round, forTeam: .red)
         let blueTeamPoints = scoreInRound(round, forTeam: .blue)
@@ -168,7 +191,10 @@ class GameScorer {
     }
 
     private func isRoundOver(_ round: Round) -> Bool {
-        return round.redThrows.count == 4 && round.blueThrows.count == 4
+        let redScore = scoreInRound(round, forTeam: .red)
+        let blueScore = scoreInRound(round, forTeam: .blue)
+        let hasTeamReachedWinningScoreAndMargin = (redScore == 21 && redScore - blueScore >= 2) || (blueScore == 21 && blueScore - redScore >= 2)
+        return hasTeamReachedWinningScoreAndMargin
     }
 
     private func throwsInRound(_ round: Round, forTeam team: Team) -> [Throw] {
